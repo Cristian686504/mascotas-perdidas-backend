@@ -19,11 +19,7 @@ app.use(express.static("./public"));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-const origins = [
-  "http://localhost:3001",
-  "https://mascotas-perdidas-app.onrender.com",
-];
-app.use(cors({ origin: origins }));
+app.use(cors());
 
 app.use((req, res, next) => {
   if (req.method === "OPTIONS") return res.sendStatus(200);
