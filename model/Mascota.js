@@ -32,8 +32,18 @@ const mascotaSchema = new mongoose.Schema({
     coordenadas: {
         type: [Number], // [longitud, latitud]
         required: true
+    },
+    posibles_coincidencias: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'encuentra'
+    }],
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        expires: 60 * 24 * 60 * 60
     }
 });
+
 const Mascota = mongoose.model('mascota', mascotaSchema);
 
 module.exports = Mascota;

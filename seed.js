@@ -1,17 +1,17 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-var connectDB = require("./db/connection");
+const connectDB = require("./db/connection");
 const Mascota = require('./model/Mascota');
+const Encuentra = require('./model/Encuentra');
 
 async function seedDatabase() {
     try {
         await connectDB();
-        console.log('Conectado a MongoDB');
+        console.log('✅ Conectado a MongoDB');
 
-        // Limpiar colecciones existentes
         await Mascota.deleteMany({});
+        await Encuentra.deleteMany({});
 
-        //Crear mascotas
         const mascotas = await Mascota.create([
             {
                 fotos_perdida: ["img/seed/luna1.png", "img/seed/luna2.png"],
@@ -65,13 +65,64 @@ async function seedDatabase() {
             }
         ]);
 
-        console.log('Mascotas creadas:', mascotas.length);
+        console.log(`🐾 ${mascotas.length} mascotas perdidas creadas`);
+
+        const encuentraDocs = await Encuentra.create([
+            {
+                foto_encontrada: "img/seed/luna_encontrada.jpg",
+                tipo_mascota: "gato",
+                ubicacion_encontrada: "En el árbol de la esquina",
+                fecha_encontrada: new Date("2025-10-18"),
+                contacto: "092 444 555",
+                descripcion: "Gata blanca con manchas grises, sin collar rosa pero muy parecida a Luna.",
+                coordenadas: [-58.0761, -32.3219],
+                mascota: mascotas[0]._id
+            },
+            {
+                foto_encontrada: "img/seed/max_encontrado.jpg",
+                tipo_mascota: "perro",
+                ubicacion_encontrada: "Lo tiene el vecino",
+                fecha_encontrada: new Date("2025-10-20"),
+                contacto: "091 222 333",
+                descripcion: "Perro labrador negro con pañuelo rojo. Se ve saludable.",
+                coordenadas: [-58.0830, -32.3171],
+                mascota: mascotas[3]._id
+            },
+            {
+                foto_encontrada: "img/seed/gato_encontrado.jpg",
+                tipo_mascota: "gato",
+                ubicacion_encontrada: "Calle Vizconde y Leandro Gómez",
+                fecha_encontrada: new Date("2025-10-25"),
+                contacto: "096 111 222",
+                descripcion: "Gato gris sin collar, puede ser callejero.",
+                coordenadas: [-58.0787, -32.3190]
+            },
+            {
+                foto_encontrada: "img/seed/perro_encontrado.jpg",
+                tipo_mascota: "perro",
+                ubicacion_encontrada: "Cerca del ITS",
+                fecha_encontrada: new Date("2025-10-27"),
+                contacto: "097 999 888",
+                descripcion: "Perro pequeño color blanco, parece perdido pero sin collar.",
+                coordenadas: [-58.0829, -32.3199]
+            }
+        ]);
+
+        console.log(`🐶 ${encuentraDocs.length} mascotas encontradas creadas`);
+
+        await Mascota.findByIdAndUpdate(mascotas[0]._id, {
+            $push: { posibles_coincidencias: encuentraDocs[0]._id }
+        });
+        await Mascota.findByIdAndUpdate(mascotas[3]._id, {
+            $push: { posibles_coincidencias: encuentraDocs[1]._id }
+        });
+
 
     } catch (err) {
-        console.error('Error al ejecutar el seed:', err);
+        console.error('❌ Error al ejecutar el seed:', err);
     } finally {
-        mongoose.connection.close();
-        console.log('Conexión a MongoDB cerrada');
+        await mongoose.connection.close();
+        console.log('🔒 Conexión a MongoDB cerrada');
     }
 }
 
